@@ -962,6 +962,51 @@ class IBlock : public Block{
       screen[x][y+1]= 1;
       screen[x][y+2] = 1;
     }
+    void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    switch (_currentRotation) {
+      case(0):{
+       screen[x][y-1] = 0;
+       screen[x-1][ y-1] = 1;
+       screen[x][y] = 0;
+       screen[x-1][y]= 1;
+       screen[x][y+1] = 0;
+       screen[x-1][y+1] = 1;
+       screen[x][y+2] = 0;
+       screen[x-1][y+2] = 1;
+       break;
+      }
+      case(1):{
+        screen[x+2][y] = 0;
+        screen[x-2][y] = 1;
+        break;
+      }
+    }
+    _point.moveHorizontal(false);
+  }
+
+  void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    switch (_currentRotation) {
+      case(0):{
+       screen[x][y-1] = 0;
+       screen[x+1][ y-1] = 1;
+       screen[x][y] = 0;
+       screen[x+1][y]= 1;
+       screen[x][y+1] = 0;
+       screen[x+1][y+1] = 1;
+       screen[x][y+2] = 0;
+       screen[x+1][y+2] = 1;
+       break;
+      }
+      case(1):{
+        screen[x-1][y] = 0;
+        screen[x+3][y] = 1;
+        break;
+      }
+    }
+    _point.moveHorizontal(true);
+  }
 
 };
 class OBlock : public Block{
@@ -1009,6 +1054,23 @@ class OBlock : public Block{
 
   }
 
+  void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    screen[x+1][y-1] = 0;
+    screen[x-1][y-1] = 1;
+    screen[x+1][y] = 0;
+    screen[x-1][y] = 1;
+    _point.moveHorizontal(false);
+  }
+  void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    screen[x][y-1] = 0;
+    screen[x+2][y-1] = 1;
+    screen[x][y] = 0;
+    screen[x+2][y] = 1;
+
+    _point.moveHorizontal(true);
+  }
 };
 class SBlock : public Block{
   public:
