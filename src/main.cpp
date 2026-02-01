@@ -10,8 +10,6 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "../include/raylib.h"
 #include <array>
 #include <cstdlib>
-#include <random>
-#include <iostream>
 #include <sys/types.h>
 
 
@@ -426,7 +424,7 @@ class JBlock : public Block{
       }
       case(2):{
         screen[x+1][y-1]=0;
-        screen[x-1][y-1] = 0;
+        screen[x-1][y-1] = 1;
         screen[x][y] = 0;
         screen[x-1][y] = 1;
         screen[x][y+1] = 0;
@@ -453,12 +451,12 @@ class JBlock : public Block{
         screen[x][y] = 0;
         screen[x+1][y] = 1;
         screen[x-1][y+1] = 0;
-        screen[x+2][y+1] = 1;
+        screen[x+1][y+1] = 1;
         break;
       }
       case(1):{
-        screen[x-1][y-1] = 0;
-        screen[x+1][y] = 0;
+        screen[x+1][y+1] = 0;
+        screen[x-1][y] = 0;
         screen[x+2][y+1] = 1;
         screen[x+2][y] = 1;
         break;
@@ -776,7 +774,7 @@ class LBlock : public Block{
       }
       case(2):{
         screen[x][y-1]=0;
-        screen[x-2][y-1] = 0;
+        screen[x-2][y-1] = 1;
         screen[x][y] = 0;
         screen[x-1][y] = 1;
         screen[x][y+1] = 0;
@@ -824,7 +822,7 @@ class LBlock : public Block{
       }
       case(3):{
         screen[x-1][y+1] = 0;
-        screen[x][y-1] = 1;
+        screen[x][y+1] = 1;
         screen[x-1][y] = 0;
         screen[x+2][y] = 1;
         break;
@@ -1194,7 +1192,53 @@ class SBlock : public Block{
       screen[x][y-1] = 1;
       screen[x+1][y-1] = 1;  
     }
-    
+
+    void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+          screen[x+1][y-1] = 0;
+          screen[x-1][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x-2][y] = 1;
+          break;
+        }
+        case(1):{
+          screen[x-1][y-1] = 0;
+          screen[x-2][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x-2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x-1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(false);
+    }
+
+    void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+          screen[x][y-1] = 0;
+          screen[x+2][y-1] = 1;
+          screen[x-1][y] = 0;
+          screen[x+1][y] = 1;
+          break;
+        }
+        case(1):{
+          screen[x-1][y-1] = 0;
+          screen[x][y-1] = 1;
+          screen[x-1][y] = 0;
+          screen[x+1][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x+1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(true);
+    }
+
 };
 class TBlock : public Block{
   public:
@@ -1315,7 +1359,7 @@ class TBlock : public Block{
         }
         case(1):{
           if(y == SCREEN_BOX_HEIGHT-2) return false;
-          bool res = screen[x-1][y+1] || screen[x][y+2];
+          bool res = screen[x+1][y+1] || screen[x][y+2];
           return !res;
         }
         case(2):{
@@ -1325,7 +1369,7 @@ class TBlock : public Block{
         }
         case(3):{
          if(y == SCREEN_BOX_HEIGHT - 2) return false;         
-         bool res = screen[x][y+2] || screen[x+1][y+1];
+         bool res = screen[x][y+2] || screen[x-1][y+1];
          return !res;
         }
       }
@@ -1341,8 +1385,8 @@ class TBlock : public Block{
           return !res;
         }
         case(1):{
-          if(x == 1) return false;
-          bool res = screen[x-1][y-1] || screen[x-2][y] || screen[x-1][y+1];
+          if(x == 0) return false;
+          bool res = screen[x-1][y-1] || screen[x-1][y] || screen[x-1][y+1];
           return !res;
         }
         case(2):{
@@ -1351,8 +1395,8 @@ class TBlock : public Block{
           return !res;
         }
         case(3):{
-          if(x == 0) return false;
-          bool res = screen[x-1][y-1] || screen[x-1][y] || screen[x-1][y+1];
+          if(x == 1) return false;
+          bool res = screen[x-1][y-1] || screen[x-2][y] || screen[x-1][y+1];
           return !res;
         }
       }
@@ -1369,7 +1413,7 @@ class TBlock : public Block{
         }
         case(1):{
           if(x == SCREEN_BOX_WIDTH-1) return false;
-          bool res = screen[x+1][y-1] || screen[x+1][y] || screen[x+1][y+1];
+          bool res = screen[x+1][y-1] || screen[x+2][y] || screen[x+1][y+1];
           return !res;
         }
         case(2):{
@@ -1378,8 +1422,8 @@ class TBlock : public Block{
           return !res;
         }
         case(3):{
-          if(x == SCREEN_BOX_WIDTH-2) return false;
-          bool res = screen[x+1][y-1] || screen[x+2][y] || screen[x][y+1];
+          if(x == SCREEN_BOX_WIDTH-1) return false;
+          bool res = screen[x+1][y-1] || screen[x+1][y] || screen[x+1][y+1];
           return !res;
         }
       }
@@ -1433,6 +1477,82 @@ class TBlock : public Block{
       screen[x+1][y] = 1;
     }
 
+  void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(),y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+         screen[x][y-1] = 0;
+         screen[x-1][y-1] = 1;
+         screen[x+1][y] = 0;
+         screen[x-2][y] = 1;
+         break;
+        }
+        case(1):{
+          screen[x][y-1] = 0;
+          screen[x-1][y-1] = 1;
+          screen[x+1][y] = 0;
+          screen[x-1][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x-1][y+1] = 1;
+          break;
+        }
+        case(2):{
+          screen[x+1][y] = 0;
+          screen[x-2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x-1][y+1] = 1;
+          break;
+        }
+        case(3):{
+          screen[x][y-1] = 0;
+          screen[x-1][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x-2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x-1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(false);
+    }
+  void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(),y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+         screen[x-1][y] = 0;
+         screen[x+2][y] = 1;
+         screen[x][y-1] = 0;
+         screen[x+1][y-1] = 1;
+         break;
+        }
+        case(1):{
+          screen[x][y-1] = 0;
+          screen[x+1][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x+2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x+1][y+1] = 1;
+          break;
+        }
+        case(2):{
+          screen[x-1][y] = 0;
+          screen[x+2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x+1][y+1] = 1;
+          break;
+        }
+        case(3):{
+          screen[x][y-1] = 0;
+          screen[x+1][y-1] = 1;
+          screen[x-1][y] = 0;
+          screen[x+1][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x+1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(true);
+    }
 };
 class ZBlock : public Block{
   public:
@@ -1558,6 +1678,54 @@ class ZBlock : public Block{
       screen[x][y-1] = 1;
       screen[x+1][y] = 1;  
     }
+
+    void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+          screen[x][y-1] = 0;
+          screen[x-2][y-1] = 1;
+          screen[x+1][y] = 0;
+          screen[x-1][y] = 1;
+          break;
+        }
+        case(1):{
+          screen[x+1][y-1] = 0;
+          screen[x][y-1] = 1;
+          screen[x+1][y] = 0;
+          screen[x-1][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x-1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(false);
+    }
+
+    void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      switch (_currentRotation) {
+        case(0):{
+          screen[x-1][y-1] = 0;
+          screen[x+1][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x+2][y] = 1;
+          break;
+        }
+        case(1):{
+          screen[x+1][y-1] = 0;
+          screen[x+2][y-1] = 1;
+          screen[x][y] = 0;
+          screen[x+2][y] = 1;
+          screen[x][y+1] = 0;
+          screen[x+1][y+1] = 1;
+          break;
+        }
+      }
+      _point.moveHorizontal(true);
+    }
+
+
 };
 
 class Game{
@@ -1591,7 +1759,7 @@ class Game{
           nextBlock = new JBlock();
           break;
         }
-       /* case(I_BLOCK):{
+        case(I_BLOCK):{
           nextBlock = new IBlock();
           break;
         }
@@ -1610,7 +1778,7 @@ class Game{
         case(Z_BLOCK):{
           nextBlock = new ZBlock();
           break;
-        }*/
+        }
       }
     }
 
@@ -1619,7 +1787,7 @@ class Game{
     void setCurrentBlock(){
       free(currentBlock);
       currentBlock = nextBlock;
-      generateNextBlock(1);
+      generateNextBlock(-1);
       currentBlock->placeBlock(screen);
     }
     void moveCurrentBlockDown(){
@@ -1657,7 +1825,7 @@ int main ()
   int dX = (screenEndX - screenStartX) / SCREEN_BOX_WIDTH;
   int dY = (screenEndY - screenStartY) / SCREEN_BOX_HEIGHT;
 
-  game.generateNextBlock(0);
+  game.generateNextBlock(5);
   game.setCurrentBlock();
 
 	while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
