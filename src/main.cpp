@@ -15,6 +15,20 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include <utility>
 
 int levelTimes[29] = {30,28,26,25,24,21,19,17,16,14,10,10,7,7,7,5,5,5,5,4,4,4,4,4,2,2,2,2,1};
+int linesLevelUp[29] = {10,20,30,40,50,60,70,80,90,100,100,100,100,100,100,100,110,120,130,140,150,160,170,180,190,200,200,200,200};
+Color colors[] = {BLACK,WHITE,BLUE,RED,GREEN,GOLD,DARKPURPLE,DARKBLUE,DARKGREEN,DARKGRAY,ORANGE};
+short colorsTable[10][4] = {
+  {0,1,2,3},
+  {0,1,4,3},
+  {0,1,5,2},
+  {0,1,10,7},
+  {0,1,6,8},
+  {0,1,9,3},
+  {0,1,4,7},
+  {0,1,3,10},
+  {0,1,7,5},
+  {0,1,6,2}
+};
 
 
 #define SCREEN_BOX_WIDTH 10
@@ -107,9 +121,14 @@ class Block{
    short _rotationCount; 
    BlockType _type;
    Point _point;
+   short _color;
+   short _aroundColor;
   public:
 
-   Block(short rotationCount,BlockType type,Point point) : _currentRotation(0), _rotationCount(rotationCount), _type(type), _point(point){};
+   Block(short rotationCount,BlockType type,Point point) : _currentRotation(0), _rotationCount(rotationCount), _type(type), _point(point){
+     _color = GetRandomValue(2,3);
+     _aroundColor = GetRandomValue(0,1);
+   };
    void rotateClockwise(){
      _currentRotation++;
      _currentRotation = _currentRotation % _rotationCount;
@@ -135,8 +154,11 @@ class Block{
    void setPoint(int x, int y){
      _point.setPoint(x, y);
    }
-
-
+    
+   short getColor(){
+     return _color;
+   }
+    
 
    virtual void rotateBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen,bool clockwise) = 0;
    virtual bool canRotate(std::array<std::array<int, SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH> screen, bool clockwise) = 0;
@@ -165,15 +187,15 @@ class JBlock : public Block{
           screen[x-1][y] = 0;
           screen[x-1][y-1]=0;
           screen[x+1][y] = 0;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
-          screen[x-1][y+1] = 1;
+          screen[x][y-1] = _color;
+          screen[x][y+1] = _color;
+          screen[x-1][y+1]= _color;
           break;
         }
         case(1):{
-          screen[x-1][y] = 1;
-          screen[x+1][y] = 1;
-          screen[x+1][y+1] = 1;
+          screen[x-1][y] =  _color;
+          screen[x+1][y] =  _color;
+          screen[x+1][y+1] = _color;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
           screen[x-1][y+1] = 0;
@@ -184,18 +206,18 @@ class JBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y] = 0;
           screen[x+1][y+1] = 0;
-          screen[x+1][y-1] = 1;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x+1][y-1] = _color;
+          screen[x][y-1] = _color ;
+          screen[x][y+1] =  _color;
           break;
         }
         case(3):{
           screen[x+1][y-1] = 0;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
-          screen[x-1][y] = 1;
-          screen[x-1][y-1] = 1;
-          screen[x+1][y] = 1;
+          screen[x-1][y] =  _color;
+          screen[x-1][y-1] =  _color;
+          screen[x+1][y] =  _color;
           break;
         }
       }
@@ -207,15 +229,15 @@ class JBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y+1]=0;
           screen[x+1][y] = 0;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
-          screen[x-1][y+1] = 1;
+          screen[x][y-1] = _color;
+          screen[x][y+1] =  _color;
+          screen[x-1][y+1] =  _color;
           break;
         }
         case(1):{
-          screen[x-1][y] = 1;
-          screen[x+1][y] = 1;
-          screen[x+1][y+1] = 1;
+          screen[x-1][y] =  _color;
+          screen[x+1][y] =  _color;
+          screen[x+1][y+1] =  _color;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
           screen[x+1][y-1] = 0;
@@ -226,18 +248,18 @@ class JBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y] = 0;
           screen[x-1][y-1] = 0;
-          screen[x+1][y-1] = 1;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x+1][y-1] = _color;
+          screen[x][y-1] = _color;
+          screen[x][y+1] = _color;
           break;
         }
         case(3):{
           screen[x-1][y+1] = 0;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
-          screen[x-1][y] = 1;
-          screen[x-1][y-1] = 1;
-          screen[x+1][y] = 1;
+          screen[x-1][y] = _color;
+          screen[x-1][y-1] = _color;
+          screen[x+1][y] = _color;
           break;
         }
       }
@@ -382,34 +404,34 @@ class JBlock : public Block{
       case(0):{
         screen[x][y-1] = 0;
         screen[x-1][y+1] = 0;
-        screen[x-1][y+2] = 1;
-        screen[x][y+2] = 1;
+        screen[x-1][y+2] =_color;
+        screen[x][y+2] =_color;
       break;
       }
       case(1):{
         screen[x-1][y] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         screen[x][y] = 0;
-        screen[x][y+1] = 1;
+        screen[x][y+1] =_color;
         screen[x+1][y] = 0;
-        screen[x+1][y+2]=1;
+        screen[x+1][y+2]=_color;
       break;
       }
       case(2):{
         screen[x][y-1]=0;
         screen[x+1][y-1] = 0;
         screen[x+1][y-1] = 0;
-        screen[x][y+2] = 1;
-        screen[x+1][y] = 1;
+        screen[x][y+2] =_color;
+        screen[x+1][y] =_color;
       break;
       }
       case(3):{
         screen[x-1][y-1] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         screen[x][y] = 0;
-        screen[x][y+1] = 1;
+        screen[x][y+1] =_color;
         screen[x+1][y] = 0;
-        screen[x+1][y+1] = 1;
+        screen[x+1][y+1] =_color;
       break;
       }
     }
@@ -418,14 +440,14 @@ class JBlock : public Block{
   
   void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    screen[x][y]= 1;
-    screen[x][y-1]= 1;
-    screen[x][y+1]= 1;
-    screen[x-1][y+1] = 1;
+    screen[x][y]=_color;
+    screen[x][y-1]=_color;
+    screen[x][y+1]=_color;
+    screen[x-1][y+1] =_color;
   }
   bool canPlaceBlock(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    if(screen[x][y] ==1 || screen[x][y-1]== 1 ||  screen[x][y+1]== 1 || screen[x-1][y+1] == 1)return false;
+    if(screen[x][y] ==1 || screen[x][y-1]!= 0 ||  screen[x][y+1]== 1 || screen[x-1][y+1] == 1)return false;
     return true;
   }
 
@@ -434,34 +456,34 @@ class JBlock : public Block{
     switch (_currentRotation) {
       case(0):{
         screen[x][y-1] = 0;
-        screen[x-1][y-1] = 1;
+        screen[x-1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x-1][y] = 1;
+        screen[x-1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x-2][y+1] = 1;
+        screen[x-2][y+1] =_color;
         break;
       }
       case(1):{
         screen[x+1][y+1] = 0;
         screen[x+1][y] = 0;
-        screen[x][y+1] = 1;
-        screen[x-2][y] = 1;
+        screen[x][y+1] =_color;
+        screen[x-2][y] =_color;
         break;
       }
       case(2):{
         screen[x+1][y-1]=0;
-        screen[x-1][y-1] = 1;
+        screen[x-1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x-1][y] = 1;
+        screen[x-1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         break;
       }
       case(3):{
         screen[x-1][y-1] = 0;
-        screen[x-2][y-1] = 1;
+        screen[x-2][y-1] =_color;
         screen[x+1][y] = 0;
-        screen[x-2][y] = 1;
+        screen[x-2][y] =_color;
         break;
       }
     }
@@ -473,34 +495,34 @@ class JBlock : public Block{
     switch (_currentRotation) {
       case(0):{
         screen[x][y-1] = 0;
-        screen[x+1][y-1] = 1;
+        screen[x+1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x+1][y] = 1;
+        screen[x+1][y] =_color;
         screen[x-1][y+1] = 0;
-        screen[x+1][y+1] = 1;
+        screen[x+1][y+1] =_color;
         break;
       }
       case(1):{
         screen[x+1][y+1] = 0;
         screen[x-1][y] = 0;
-        screen[x+2][y+1] = 1;
-        screen[x+2][y] = 1;
+        screen[x+2][y+1] =_color;
+        screen[x+2][y] =_color;
         break;
       }
       case(2):{
         screen[x][y-1] = 0;
-        screen[x+2][y-1] = 1;
+        screen[x+2][y-1] =_color;
         screen[x][y] = 0;
-        screen[x+1][y] = 1;
+        screen[x+1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x+1][y+1] = 1;
+        screen[x+1][y+1] =_color;
         break;
       }
       case(3):{
         screen[x-1][y-1] = 0;
-        screen[x][y-1] = 1;
+        screen[x][y-1] =_color;
         screen[x-1][y] = 0;
-        screen[x+2][y] = 1;
+        screen[x+2][y] =_color;
         break;
       }
     }
@@ -523,15 +545,15 @@ class LBlock : public Block{
           screen[x-1][y] = 0;
           screen[x-1][y+1]=0;
           screen[x+1][y] = 0;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
-          screen[x+1][y+1] = 1;
+          screen[x][y-1] =_color;
+          screen[x][y+1] =_color;
+          screen[x+1][y+1] =_color;
           break;
         }
         case(1):{
-          screen[x-1][y] = 1;
-          screen[x+1][y] = 1;
-          screen[x+1][y-1] = 1;
+          screen[x-1][y] =_color;
+          screen[x+1][y] =_color;
+          screen[x+1][y-1] =_color;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
           screen[x+1][y+1] = 0;
@@ -542,18 +564,18 @@ class LBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y] = 0;
           screen[x+1][y-1] = 0;
-          screen[x-1][y-1] = 1;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x-1][y-1] =_color;
+          screen[x][y-1] =_color;
+          screen[x][y+1] =_color;
           break;
         }
         case(3):{
           screen[x-1][y-1] = 0;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
-          screen[x-1][y] = 1;
-          screen[x-1][y+1] = 1;
-          screen[x+1][y] = 1;
+          screen[x-1][y] =_color;
+          screen[x-1][y+1] =_color;
+          screen[x+1][y] =_color;
           break;
         }
       }
@@ -565,15 +587,15 @@ class LBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y-1]=0;
           screen[x+1][y] = 0;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
-          screen[x+1][y+1] = 1;
+          screen[x][y-1] =_color;
+          screen[x][y+1] =_color;
+          screen[x+1][y+1] =_color;
           break;
         }
         case(1):{
-          screen[x-1][y] = 1;
-          screen[x+1][y] = 1;
-          screen[x+1][y-1] = 1;
+          screen[x-1][y] =_color;
+          screen[x+1][y] =_color;
+          screen[x+1][y-1] =_color;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
           screen[x-1][y-1] = 0;
@@ -584,18 +606,18 @@ class LBlock : public Block{
           screen[x-1][y] = 0;
           screen[x+1][y] = 0;
           screen[x-1][y+1] = 0;
-          screen[x-1][y-1] = 1;
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x-1][y-1] =_color;
+          screen[x][y-1] =_color;
+          screen[x][y+1] =_color;
           break;
         }
         case(3):{
           screen[x+1][y+1] = 0;
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
-          screen[x-1][y] = 1;
-          screen[x-1][y+1] = 1;
-          screen[x+1][y] = 1;
+          screen[x-1][y] =_color;
+          screen[x-1][y+1] =_color;
+          screen[x+1][y] =_color;
           break;
         }
       }
@@ -739,34 +761,34 @@ class LBlock : public Block{
       case(0):{
         screen[x][y-1] = 0;
         screen[x+1][y+1] = 0;
-        screen[x+1][y+2] = 1;
-        screen[x][y+2] = 1;
+        screen[x+1][y+2] =_color;
+        screen[x][y+2] =_color;
       break;
       }
       case(1):{
         screen[x-1][y] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         screen[x][y] = 0;
-        screen[x][y+1] = 1;
+        screen[x][y+1] =_color;
         screen[x+1][y-1] = 0;
-        screen[x+1][y+1]=1;
+        screen[x+1][y+1]=_color;
         break;
       }
       case(2):{
         screen[x][y-1]=0;
         screen[x-1][y-1] = 0;
         screen[x-1][y-1] = 0;
-        screen[x][y+2] = 1;
-        screen[x-1][y] = 1;
+        screen[x][y+2] =_color;
+        screen[x-1][y] =_color;
       break;
       }
       case(3):{
         screen[x-1][y] = 0;
-        screen[x-1][y+2] = 1;
+        screen[x-1][y+2] =_color;
         screen[x][y] = 0;
-        screen[x][y+1] = 1;
+        screen[x][y+1] =_color;
         screen[x+1][y] = 0;
-        screen[x+1][y+1] = 1;
+        screen[x+1][y+1] =_color;
       break;
       }
     }
@@ -776,14 +798,14 @@ class LBlock : public Block{
 
   void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    screen[x][y]= 1;
-    screen[x][y-1]= 1;
-    screen[x][y+1]= 1;
-    screen[x+1][y+1] = 1;
+    screen[x][y]=_color;
+    screen[x][y-1]=_color;
+    screen[x][y+1]=_color;
+    screen[x+1][y+1] =_color;
   }
   bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    if(screen[x][y] == 1 || screen[x][y-1] == 1 || screen[x][y+1] == 1 || screen[x+1][y+1] == 1)
+    if(screen[x][y] != 0 || screen[x][y-1] == 1 || screen[x][y+1] == 1 || screen[x+1][y+1] == 1)
       return false;
     return true;
   }
@@ -793,34 +815,34 @@ class LBlock : public Block{
     switch (_currentRotation) {
       case(0):{
         screen[x][y-1] = 0;
-        screen[x-1][y-1] = 1;
+        screen[x-1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x-1][y] = 1;
+        screen[x-1][y] =_color;
         screen[x+1][y+1] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         break;
       }
       case(1):{
         screen[x+1][y-1] = 0;
         screen[x+1][y] = 0;
-        screen[x][y-1] = 1;
-        screen[x-2][y] = 1;
+        screen[x][y-1] =_color;
+        screen[x-2][y] =_color;
         break;
       }
       case(2):{
         screen[x][y-1]=0;
-        screen[x-2][y-1] = 1;
+        screen[x-2][y-1] =_color;
         screen[x][y] = 0;
-        screen[x-1][y] = 1;
+        screen[x-1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x-1][y+1] = 1;
+        screen[x-1][y+1] =_color;
         break;
       }
       case(3):{
         screen[x-1][y+1] = 0;
-        screen[x-2][y+1] = 1;
+        screen[x-2][y+1] =_color;
         screen[x+1][y] = 0;
-        screen[x-2][y] = 1;
+        screen[x-2][y] =_color;
         break;
       }
     }
@@ -832,34 +854,34 @@ class LBlock : public Block{
     switch (_currentRotation) {
       case(0):{
         screen[x][y-1] = 0;
-        screen[x+1][y-1] = 1;
+        screen[x+1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x+1][y] = 1;
+        screen[x+1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x+2][y+1] = 1;
+        screen[x+2][y+1] =_color;
         break;
       }
       case(1):{
         screen[x+1][y-1] = 0;
         screen[x-1][y] = 0;
-        screen[x+2][y-1] = 1;
-        screen[x+2][y] = 1;
+        screen[x+2][y-1] =_color;
+        screen[x+2][y] =_color;
         break;
       }
       case(2):{
         screen[x-1][y-1] = 0;
-        screen[x+1][y-1] = 1;
+        screen[x+1][y-1] =_color;
         screen[x][y] = 0;
-        screen[x+1][y] = 1;
+        screen[x+1][y] =_color;
         screen[x][y+1] = 0;
-        screen[x+1][y+1] = 1;
+        screen[x+1][y+1] =_color;
         break;
       }
       case(3):{
         screen[x-1][y+1] = 0;
-        screen[x][y+1] = 1;
+        screen[x][y+1] =_color;
         screen[x-1][y] = 0;
-        screen[x+2][y] = 1;
+        screen[x+2][y] =_color;
         break;
       }
     }
@@ -876,9 +898,9 @@ class IBlock : public Block{
       rotateClockwise();
       switch (_currentRotation) {
         case(0):{
-          screen[x][y-1] = 1;
-          screen[x][y+1] = 1;
-          screen[x][y+2] = 1;
+          screen[x][y-1] =_color;
+          screen[x][y+1] =_color;
+          screen[x][y+2] =_color;
           screen[x-1][y] = 0;
           screen[x+1][y] = 0;
           screen[x+2][y] = 0;
@@ -888,9 +910,9 @@ class IBlock : public Block{
           screen[x][y-1] = 0;
           screen[x][y+1] = 0;
           screen[x][y+2] = 0;
-          screen[x-1][y] = 1;
-          screen[x+1][y] = 1;
-          screen[x+2][y] = 1;
+          screen[x-1][y] =_color;
+          screen[x+1][y] =_color;
+          screen[x+2][y] =_color;
           break;
         }
       }
@@ -970,18 +992,18 @@ class IBlock : public Block{
       switch (_currentRotation) {
         case(0):{
           screen[x][y-1] = 0;
-          screen[x][y+3] = 1;
+          screen[x][y+3] =_color;
           break;
         }
         case(1):{
           screen[x-1][y] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           screen[x][y] = 0;
-          screen[x][y+1] = 1;
+          screen[x][y+1] =_color;
           screen[x+1][y] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           screen[x+2][y] = 0;
-          screen[x+2][y+1] = 1;
+          screen[x+2][y+1] =_color;
           break;
         }
       }
@@ -990,14 +1012,14 @@ class IBlock : public Block{
 
     void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      screen[x][y]= 1;
-      screen[x][y-1]= 1;
-      screen[x][y+1]= 1;
-      screen[x][y+2] = 1;
+      screen[x][y]=_color;
+      screen[x][y-1]=_color;
+      screen[x][y+1]=_color;
+      screen[x][y+2] =_color;
     }
     bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      if(screen[x][y] == 1 || screen[x][y-1]== 1 || screen[x][y+1] == 1 || screen[x][y+2] == 1)
+      if(screen[x][y] != 0 || screen[x][y-1]== 1 || screen[x][y+1] == 1 || screen[x][y+2] == 1)
         return false;
       return true;
     }
@@ -1006,18 +1028,18 @@ class IBlock : public Block{
     switch (_currentRotation) {
       case(0):{
        screen[x][y-1] = 0;
-       screen[x-1][ y-1] = 1;
+       screen[x-1][ y-1] =_color;
        screen[x][y] = 0;
-       screen[x-1][y]= 1;
+       screen[x-1][y]=_color;
        screen[x][y+1] = 0;
-       screen[x-1][y+1] = 1;
+       screen[x-1][y+1] =_color;
        screen[x][y+2] = 0;
-       screen[x-1][y+2] = 1;
+       screen[x-1][y+2] =_color;
        break;
       }
       case(1):{
         screen[x+2][y] = 0;
-        screen[x-2][y] = 1;
+        screen[x-2][y] =_color;
         break;
       }
     }
@@ -1029,18 +1051,18 @@ class IBlock : public Block{
     switch (_currentRotation) {
       case(0):{
        screen[x][y-1] = 0;
-       screen[x+1][ y-1] = 1;
+       screen[x+1][ y-1] =_color;
        screen[x][y] = 0;
-       screen[x+1][y]= 1;
+       screen[x+1][y]=_color;
        screen[x][y+1] = 0;
-       screen[x+1][y+1] = 1;
+       screen[x+1][y+1] =_color;
        screen[x][y+2] = 0;
-       screen[x+1][y+2] = 1;
+       screen[x+1][y+2] =_color;
        break;
       }
       case(1):{
         screen[x-1][y] = 0;
-        screen[x+3][y] = 1;
+        screen[x+3][y] =_color;
         break;
       }
     }
@@ -1079,22 +1101,22 @@ class OBlock : public Block{
     int x = _point.getX(), y = _point.getY();
     screen[x][y-1] = 0;
     screen[x+1][y-1] = 0;
-    screen[x][y+1] = 1;
-    screen[x+1][y+1] = 1;
+    screen[x][y+1] =_color;
+    screen[x+1][y+1] =_color;
     _point.goDown();
   }
 
   void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    screen[x+1][y-1] = 1;
-    screen[x+1][y] = 1;
-    screen[x][y] = 1;
-    screen[x][y-1] = 1;
+    screen[x+1][y-1] =_color;
+    screen[x+1][y] =_color;
+    screen[x][y] =_color;
+    screen[x][y-1] =_color;
 
   }
   bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
     int x = _point.getX(), y = _point.getY();
-    if(screen[x+1][y-1] == 1 || screen[x+1][y] == 1 || screen[x][y] == 1 || screen[x][y-1] == 1)
+    if(screen[x+1][y-1] != 0 || screen[x+1][y] == 1 || screen[x][y] == 1 || screen[x][y-1] == 1)
       return false;
     return true;
 
@@ -1102,17 +1124,17 @@ class OBlock : public Block{
   void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
     screen[x+1][y-1] = 0;
-    screen[x-1][y-1] = 1;
+    screen[x-1][y-1] =_color;
     screen[x+1][y] = 0;
-    screen[x-1][y] = 1;
+    screen[x-1][y] =_color;
     _point.moveHorizontal(false);
   }
   void moveRight(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
     screen[x][y-1] = 0;
-    screen[x+2][y-1] = 1;
+    screen[x+2][y-1] =_color;
     screen[x][y] = 0;
-    screen[x+2][y] = 1;
+    screen[x+2][y] =_color;
 
     _point.moveHorizontal(true);
   }
@@ -1125,8 +1147,8 @@ class SBlock : public Block{
       rotateClockwise();
       switch (_currentRotation) {
         case(0):{
-          screen[x][y-1] = 1;
-          screen[x+1][y-1] = 1;
+          screen[x][y-1] =_color;
+          screen[x+1][y-1] =_color;
           screen[x-1][y-1] = 0;
           screen[x][y+1] = 0;
           break;
@@ -1134,8 +1156,8 @@ class SBlock : public Block{
         case(1):{
           screen[x][y-1] = 0;
           screen[x+1][y-1] = 0;
-          screen[x-1][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x-1][y-1] =_color;
+          screen[x][y+1] =_color;
           break;
         }
       }
@@ -1214,18 +1236,18 @@ class SBlock : public Block{
      switch (_currentRotation) {
        case(0):{
         screen[x-1][y]=0;
-        screen[x-1][y+1]=1;
+        screen[x-1][y+1] = _color;
         screen[x][y-1] = 0;
         screen[x+1][y-1]=0;
-        screen[x][y+1] = 1;
-        screen[x+1][y] = 1;
+        screen[x][y+1] =_color;
+        screen[x+1][y] =_color;
         break;
        }
        case(1):{
         screen[x-1][y-1] = 0;
         screen[x][y]=0;
-        screen[x-1][y+1]=1;
-        screen[x][y+2]=1;
+        screen[x-1][y+1]=_color;
+        screen[x][y+2]=_color;
         break;
        }
      }
@@ -1234,14 +1256,14 @@ class SBlock : public Block{
 
     void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      screen[x][y] = 1;
-      screen[x-1][y] = 1;
-      screen[x][y-1] = 1;
-      screen[x+1][y-1] = 1;  
+      screen[x][y] =_color;
+      screen[x-1][y] =_color;
+      screen[x][y-1] =_color;
+      screen[x+1][y-1] =_color;  
     }
     bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      if(screen[x][y] == 1 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y-1] == 1)
+      if(screen[x][y] != 0 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y-1] == 1)
         return false;
       return true;
     }
@@ -1251,18 +1273,18 @@ class SBlock : public Block{
       switch (_currentRotation) {
         case(0):{
           screen[x+1][y-1] = 0;
-          screen[x-1][y-1] = 1;
+          screen[x-1][y-1] =_color;
           screen[x][y] = 0;
-          screen[x-2][y] = 1;
+          screen[x-2][y] =_color;
           break;
         }
         case(1):{
           screen[x-1][y-1] = 0;
-          screen[x-2][y-1] = 1;
+          screen[x-2][y-1] =_color;
           screen[x][y] = 0;
-          screen[x-2][y] = 1;
+          screen[x-2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           break;
         }
       }
@@ -1274,18 +1296,18 @@ class SBlock : public Block{
       switch (_currentRotation) {
         case(0):{
           screen[x][y-1] = 0;
-          screen[x+2][y-1] = 1;
+          screen[x+2][y-1] =_color;
           screen[x-1][y] = 0;
-          screen[x+1][y] = 1;
+          screen[x+1][y] =_color;
           break;
         }
         case(1):{
           screen[x-1][y-1] = 0;
-          screen[x][y-1] = 1;
+          screen[x][y-1] =_color;
           screen[x-1][y] = 0;
-          screen[x+1][y] = 1;
+          screen[x+1][y] =_color;
           screen[x][y+1] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           break;
         }
       }
@@ -1303,22 +1325,22 @@ class TBlock : public Block{
         switch (_currentRotation) {
           case(0):{
             screen[x][y+1]=0;
-            screen[x+1][y]=1;
+            screen[x+1][y]=_color;
             break;
           }
           case(1):{
             screen[x-1][y] = 0;
-            screen[x][y+1] = 1;
+            screen[x][y+1] =_color;
             break;
           }
           case(2):{
             screen[x][y-1]=0;
-            screen[x-1][y]=1;
+            screen[x-1][y]=_color;
             break;
           }
           case(3):{
             screen[x+1][y] = 0;
-            screen[x][y-1] = 1;
+            screen[x][y-1] =_color;
             break;
           }
         
@@ -1329,22 +1351,22 @@ class TBlock : public Block{
         switch (_currentRotation) {
           case(0):{
             screen[x][y+1]=0;
-            screen[x-1][y]=1;
+            screen[x-1][y]=_color;
             break;
           }
           case(1):{
             screen[x-1][y] = 0;
-            screen[x][y-1] = 1;
+            screen[x][y-1] =_color;
             break;
           }
           case(2):{
             screen[x][y-1]=0;
-            screen[x+1][y]=1;
+            screen[x+1][y]=_color;
             break;
           }
           case(3):{
             screen[x+1][y] = 0;
-            screen[x][y+1] = 1;
+            screen[x][y+1] =_color;
             break;
           }
 
@@ -1434,7 +1456,7 @@ class TBlock : public Block{
       int x = _point.getX(),y = _point.getY();
       switch (_currentRotation) {
         case(0):{
-          if(x == 1) return false;
+          if(x ==1 ) return false;
           bool res = screen[x-1][y-1] || screen[x-2][y];
           return !res;
         }
@@ -1489,34 +1511,34 @@ class TBlock : public Block{
       switch (_currentRotation) {
         case(0):{
          screen[x-1][y] = 0;
-         screen[x-1][y+1] = 1;
+         screen[x-1][y+1] =_color;
          screen[x][y-1] = 0;
-         screen[x][y+1] = 1;
+         screen[x][y+1] =_color;
          screen[x+1][y] = 0;
-         screen[x+1][y+1] = 1;
+         screen[x+1][y+1] =_color;
          break;
         }
         case(1):{
          screen[x+1][y] = 0;
-         screen[x+1][y+1] = 1;
+         screen[x+1][y+1] =_color;
          screen[x][y-1] = 0;
-         screen[x][y+2]=1;
+         screen[x][y+2]=_color;
          break;
         }
         case(2):{
          screen[x-1][y] = 0;
-         screen[x-1][y+1] = 1;
+         screen[x-1][y+1] =_color;
          screen[x][y]=0;
-         screen[x][y+2] = 1;
+         screen[x][y+2] =_color;
          screen[x+1][y] = 0;
-         screen[x+1][y+1] = 1;
+         screen[x+1][y+1] =_color;
          break;
         }
         case(3):{
          screen[x-1][y] = 0;
-         screen[x-1][y+1] = 1;
+         screen[x-1][y+1] =_color;
          screen[x][y-1] = 0;
-         screen[x][y+2]=1;
+         screen[x][y+2]=_color;
          break;
         }
       }
@@ -1525,14 +1547,14 @@ class TBlock : public Block{
 
     void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(),y = _point.getY();
-      screen[x][y] = 1;
-      screen[x-1][y] = 1;
-      screen[x][y-1] = 1;
-      screen[x+1][y] = 1;
+      screen[x][y] =_color;
+      screen[x-1][y] =_color;
+      screen[x][y-1] =_color;
+      screen[x+1][y] =_color;
     }
     bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      if(screen[x][y] == 1 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
+      if(screen[x][y] != 0 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
         return false;
       return true;
     }
@@ -1541,34 +1563,34 @@ class TBlock : public Block{
       switch (_currentRotation) {
         case(0):{
          screen[x][y-1] = 0;
-         screen[x-1][y-1] = 1;
+         screen[x-1][y-1] =_color;
          screen[x+1][y] = 0;
-         screen[x-2][y] = 1;
+         screen[x-2][y] =_color;
          break;
         }
         case(1):{
           screen[x][y-1] = 0;
-          screen[x-1][y-1] = 1;
+          screen[x-1][y-1] =_color;
           screen[x+1][y] = 0;
-          screen[x-1][y] = 1;
+          screen[x-1][y] =_color;
           screen[x][y+1] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           break;
         }
         case(2):{
           screen[x+1][y] = 0;
-          screen[x-2][y] = 1;
+          screen[x-2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           break;
         }
         case(3):{
           screen[x][y-1] = 0;
-          screen[x-1][y-1] = 1;
+          screen[x-1][y-1] =_color;
           screen[x][y] = 0;
-          screen[x-2][y] = 1;
+          screen[x-2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           break;
         }
       }
@@ -1579,34 +1601,34 @@ class TBlock : public Block{
       switch (_currentRotation) {
         case(0):{
          screen[x-1][y] = 0;
-         screen[x+2][y] = 1;
+         screen[x+2][y] =_color;
          screen[x][y-1] = 0;
-         screen[x+1][y-1] = 1;
+         screen[x+1][y-1] =_color;
          break;
         }
         case(1):{
           screen[x][y-1] = 0;
-          screen[x+1][y-1] = 1;
+          screen[x+1][y-1] =_color;
           screen[x][y] = 0;
-          screen[x+2][y] = 1;
+          screen[x+2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           break;
         }
         case(2):{
           screen[x-1][y] = 0;
-          screen[x+2][y] = 1;
+          screen[x+2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           break;
         }
         case(3):{
           screen[x][y-1] = 0;
-          screen[x+1][y-1] = 1;
+          screen[x+1][y-1] =_color;
           screen[x-1][y] = 0;
-          screen[x+1][y] = 1;
+          screen[x+1][y] =_color;
           screen[x][y+1] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           break;
         }
       }
@@ -1622,8 +1644,8 @@ class ZBlock : public Block{
       rotateClockwise();
       switch (_currentRotation) {
         case(0):{
-          screen[x][y-1] = 1;
-          screen[x-1][y-1] = 1;
+          screen[x][y-1] =_color;
+          screen[x-1][y-1] =_color;
           screen[x+1][y-1] = 0;
           screen[x][y+1] = 0;
           break;
@@ -1631,8 +1653,8 @@ class ZBlock : public Block{
         case(1):{
           screen[x][y-1] = 0;
           screen[x-1][y-1] = 0;
-          screen[x+1][y-1] = 1;
-          screen[x][y+1] = 1;
+          screen[x+1][y-1] =_color;
+          screen[x][y+1] =_color;
           break;
         }
       }
@@ -1711,19 +1733,19 @@ class ZBlock : public Block{
      int x = _point.getX(), y = _point.getY();
      switch (_currentRotation) {
        case(0):{
-        screen[x-1][y]=1;
+        screen[x-1][y]= _color;
         screen[x-1][y-1]=0;
         screen[x][y-1] = 0;
         screen[x+1][y]=0;
-        screen[x][y+1] = 1;
-        screen[x+1][y+1] = 1;
+        screen[x][y+1] =_color;
+        screen[x+1][y+1] =_color;
         break;
        }
        case(1):{
         screen[x+1][y-1] = 0;
         screen[x][y]=0;
-        screen[x+1][y+1]=1;
-        screen[x][y+2]=1;
+        screen[x+1][y+1]= _color;
+        screen[x][y+2]= _color;
         break;
        }
      }
@@ -1732,14 +1754,14 @@ class ZBlock : public Block{
 
     void placeBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      screen[x][y] = 1;
-      screen[x-1][y-1] = 1;
-      screen[x][y-1] = 1;
-      screen[x+1][y] = 1;  
+      screen[x][y] =_color;
+      screen[x-1][y-1] =_color;
+      screen[x][y-1] =_color;
+      screen[x+1][y] =_color;  
     } 
     bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
       int x = _point.getX(), y = _point.getY();
-      if(screen[x][y] == 1 || screen[x-1][y-1] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
+      if(screen[x][y] != 0 || screen[x-1][y-1] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
         return false;
       return true;
     }
@@ -1749,18 +1771,18 @@ class ZBlock : public Block{
       switch (_currentRotation) {
         case(0):{
           screen[x][y-1] = 0;
-          screen[x-2][y-1] = 1;
+          screen[x-2][y-1] =_color;
           screen[x+1][y] = 0;
-          screen[x-1][y] = 1;
+          screen[x-1][y] =_color;
           break;
         }
         case(1):{
           screen[x+1][y-1] = 0;
-          screen[x][y-1] = 1;
+          screen[x][y-1] =_color;
           screen[x+1][y] = 0;
-          screen[x-1][y] = 1;
+          screen[x-1][y] =_color;
           screen[x][y+1] = 0;
-          screen[x-1][y+1] = 1;
+          screen[x-1][y+1] =_color;
           break;
         }
       }
@@ -1772,18 +1794,18 @@ class ZBlock : public Block{
       switch (_currentRotation) {
         case(0):{
           screen[x-1][y-1] = 0;
-          screen[x+1][y-1] = 1;
+          screen[x+1][y-1] =_color;
           screen[x][y] = 0;
-          screen[x+2][y] = 1;
+          screen[x+2][y] =_color;
           break;
         }
         case(1):{
           screen[x+1][y-1] = 0;
-          screen[x+2][y-1] = 1;
+          screen[x+2][y-1] =_color;
           screen[x][y] = 0;
-          screen[x+2][y] = 1;
+          screen[x+2][y] =_color;
           screen[x][y+1] = 0;
-          screen[x+1][y+1] = 1;
+          screen[x+1][y+1] =_color;
           break;
         }
       }
@@ -1799,13 +1821,15 @@ class Game{
     Block* nextBlock;
     Score score;
     int currentLevel;
+    int linesBroken;
   public:
     std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> screen;
     std::array<std::array<int, 5>, 5> nextBlockScreen;
     Game(){
       currentBlock = nullptr;
       nextBlock = nullptr;
-      currentLevel = 1;
+      currentLevel = 0;
+      linesBroken = 0;
       for(int i = 0; i < SCREEN_BOX_WIDTH;i++){
         for(int j = 0; j < SCREEN_BOX_HEIGHT; j++){
           screen[i][j] = 0;
@@ -1864,13 +1888,14 @@ class Game{
     }
 
     void drawNextShape(){
+      short color = nextBlock->getColor();
       switch (nextBlock->getBlockType()) {
         case(J_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,0,1,0,0},
-            {0,0,1,0,0},
-            {0,1,1,0,0},
+            {0,0,color,0,0},
+            {0,0,color,0,0},
+            {0,color,color,0,0},
             {0,0,0,0,0}
           }};
           break;
@@ -1878,9 +1903,9 @@ class Game{
         case(L_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,0,1,0,0},
-            {0,0,1,0,0},
-            {0,0,1,1,0},
+            {0,0,color,0,0},
+            {0,0,color,0,0},
+            {0,0,color,color,0},
             {0,0,0,0,0}
           }};
           break;
@@ -1888,18 +1913,18 @@ class Game{
         case(I_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,0,1,0,0},
-            {0,0,1,0,0},
-            {0,0,1,0,0},
-            {0,0,1,0,0}
+            {0,0,color,0,0},
+            {0,0,color,0,0},
+            {0,0,color,0,0},
+            {0,0,color,0,0}
           }};
           break;
         }
         case(O_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,0,1,1,0},
-            {0,0,1,1,0},
+            {0,0,color,color,0},
+            {0,0,color,color,0},
             {0,0,0,0,0},
             {0,0,0,0,0}
           }};
@@ -1908,8 +1933,8 @@ class Game{
         case(S_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,0,1,1,0},
-            {0,1,1,0,0},
+            {0,0,color,color,0},
+            {0,color,color,0,0},
             {0,0,0,0,0},
             {0,0,0,0,0}
           }};
@@ -1918,8 +1943,8 @@ class Game{
         case(T_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,1,1,1,0},
-            {0,0,1,0,0},
+            {0,color,color,color,0},
+            {0,0,color,0,0},
             {0,0,0,0,0},
             {0,0,0,0,0}
           }};
@@ -1928,8 +1953,8 @@ class Game{
         case(Z_BLOCK):{
           nextBlockScreen = {{
             {0,0,0,0,0},
-            {0,1,1,0,0},
-            {0,0,1,1,0},
+            {0,color,color,0,0},
+            {0,0,color,color,0},
             {0,0,0,0,0},
             {0,0,0,0,0}
           }};
@@ -1971,6 +1996,7 @@ class Game{
           clearLine(screen,i);
           int j = i;
           linesDeleted++;
+          linesBroken++;
           while (j > 0 && !isLineEmpty(screen,j-1)) {
             swapLines(screen, j-1, j);
             j--;
@@ -1978,6 +2004,9 @@ class Game{
         }
       }
       score.increaseScore(linesDeleted,currentLevel);
+      if(linesBroken >= linesLevelUp[std::min(28,currentLevel)]){
+        currentLevel++;
+      }
     }
 
     bool setCurrentBlock(){
@@ -2029,7 +2058,7 @@ int main ()
   int delay = 0;
 	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
   bool gameActive = true;
-	InitWindow(600, 900, "OOP-Tetris");
+	InitWindow(600, 700, "OOP-Tetris");
   int framecount = 0;
   int blockSpeed = levelTimes[0];
   SetTargetFPS(60);
@@ -2056,8 +2085,8 @@ int main ()
       DrawRectangleLines(screenStartX,screenStartY,250,500, BLACK);
       for(int i = 0; i < SCREEN_BOX_HEIGHT; i++){
         for(int j = 0; j < SCREEN_BOX_WIDTH; j++){
-          if(game.screen[j][i] == 1)
-              DrawRectangle(screenStartX + j * dX, screenStartY + i * dY, dX,dY,RED);
+          if(game.screen[j][i] != 0)
+              DrawRectangle(screenStartX + j * dX, screenStartY + i * dY, dX,dY,colors[colorsTable[game.getCurrentLevel()][game.screen[j][i]]]);
         }
       }
       DrawRectangleLines(nextScreenStartX, nextScreenStartY, 5*dX, 5*dY,BLACK);
@@ -2065,8 +2094,8 @@ int main ()
       // Display next Block
       for(int i = 0; i < 5; i++){
         for(int j = 0; j < 5; j++){
-          if(game.nextBlockScreen[j][i] == 1)
-            DrawRectangle(nextScreenStartX + i * dX,nextScreenStartY + j * dY, dX, dY, RED);
+          if(game.nextBlockScreen[j][i] != 0)
+            DrawRectangle(nextScreenStartX + i * dX,nextScreenStartY + j * dY, dX, dY,colors[colorsTable[game.getCurrentLevel()][game.nextBlockScreen[j][i]]]);
         }
       }
       // Display current Score;
@@ -2084,10 +2113,10 @@ int main ()
         delay = 0;
       }
       // catch key presses
-      if(IsKeyPressed(KEY_X) && game.getCurrentBlock()->canRotate(game.screen, true)){
+      if(IsKeyPressed(KEY_Z) && game.getCurrentBlock()->canRotate(game.screen, true)){
         game.getCurrentBlock()->rotateBlock(game.screen, true);
       }
-      if(IsKeyPressed(KEY_Z) && game.getCurrentBlock()->canRotate(game.screen, false)){
+      if(IsKeyPressed(KEY_X) && game.getCurrentBlock()->canRotate(game.screen, false)){
         game.getCurrentBlock()->rotateBlock(game.screen,false);
       }
       if(IsKeyPressed(KEY_LEFT) && game.getCurrentBlock()->canMoveLeft(game.screen)){
@@ -2097,11 +2126,11 @@ int main ()
         game.getCurrentBlock()->moveRight(game.screen);
       }
       
-      if(game.getCurrentLevel() > 30){
-        blockSpeed = levelTimes[28];
+      if(IsKeyDown(KEY_DOWN)){
+        blockSpeed = 2;
       }
       else{
-        blockSpeed = levelTimes[game.getCurrentLevel()];
+        blockSpeed = levelTimes[std::min(game.getCurrentLevel(),28)];
       }
 
 
@@ -2112,7 +2141,7 @@ int main ()
             break;
           }
           case(1):{
-            delay = 20/game.getCurrentLevel();
+            delay = 16;
             break;
           }
           case(-1):{
