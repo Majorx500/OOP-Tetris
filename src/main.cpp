@@ -10,7 +10,11 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "../include/raylib.h"
 #include <array>
 #include <cstdlib>
+#include <string>
 #include <sys/types.h>
+#include <utility>
+
+int levelTimes[29] = {30,28,26,25,24,21,19,17,16,14,10,10,7,7,7,5,5,5,5,4,4,4,4,4,2,2,2,2,1};
 
 
 #define SCREEN_BOX_WIDTH 10
@@ -45,6 +49,10 @@ class Point{
      if(right) X++;
      else X--;
    }
+   void setPoint(int x, int y){
+     X = x;
+     Y = y;
+   }
 };
 
 class Score{
@@ -54,6 +62,10 @@ class Score{
 
   public:
   
+  Score() : currentScore(0), topScore(0){
+
+  }
+
   int getCurrentScore(){
     return currentScore;
   }
@@ -82,6 +94,10 @@ class Score{
   }
   long getTopScore(){
     return topScore;
+  }
+  void resetScore(){
+    topScore = topScore < currentScore ? currentScore : topScore;
+    currentScore = 0;
   }
 };
 
@@ -116,6 +132,10 @@ class Block{
    Point getPoint(){
      return _point;
    }
+   void setPoint(int x, int y){
+     _point.setPoint(x, y);
+   }
+
 
 
    virtual void rotateBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen,bool clockwise) = 0;
@@ -128,6 +148,7 @@ class Block{
   
    virtual void moveLeft(std::array<std::array<int,SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH>& screen) = 0;
    virtual void moveRight(std::array<std::array<int,SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH>& screen) = 0;
+   virtual bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH>& screen) = 0;
 };
 
 class JBlock : public Block{
@@ -402,6 +423,11 @@ class JBlock : public Block{
     screen[x][y+1]= 1;
     screen[x-1][y+1] = 1;
   }
+  bool canPlaceBlock(std::array<std::array<int, 20>, 10> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    if(screen[x][y] ==1 || screen[x][y-1]== 1 ||  screen[x][y+1]== 1 || screen[x-1][y+1] == 1)return false;
+    return true;
+  }
 
   void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
@@ -480,6 +506,7 @@ class JBlock : public Block{
     }
     _point.moveHorizontal(true);
   }
+
 };
 
 class LBlock : public Block{
@@ -581,6 +608,7 @@ class LBlock : public Block{
     if(clockwise)
       switch (currentRotation) {
         case(0):{
+          if(x == 0 || x == SCREEN_BOX_WIDTH - 1) return false;
           bool res = screen[x-1][y] | screen[x+1][y] | screen[x+1][y-1];
           return !res;
         }
@@ -753,6 +781,13 @@ class LBlock : public Block{
     screen[x][y+1]= 1;
     screen[x+1][y+1] = 1;
   }
+  bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    if(screen[x][y] == 1 || screen[x][y-1] == 1 || screen[x][y+1] == 1 || screen[x+1][y+1] == 1)
+      return false;
+    return true;
+  }
+
   void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
     switch (_currentRotation) {
@@ -960,6 +995,12 @@ class IBlock : public Block{
       screen[x][y+1]= 1;
       screen[x][y+2] = 1;
     }
+    bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      if(screen[x][y] == 1 || screen[x][y-1]== 1 || screen[x][y+1] == 1 || screen[x][y+2] == 1)
+        return false;
+      return true;
+    }
     void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
     switch (_currentRotation) {
@@ -1051,7 +1092,13 @@ class OBlock : public Block{
     screen[x][y-1] = 1;
 
   }
+  bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+    int x = _point.getX(), y = _point.getY();
+    if(screen[x+1][y-1] == 1 || screen[x+1][y] == 1 || screen[x][y] == 1 || screen[x][y-1] == 1)
+      return false;
+    return true;
 
+  }
   void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(), y = _point.getY();
     screen[x+1][y-1] = 0;
@@ -1192,6 +1239,12 @@ class SBlock : public Block{
       screen[x][y-1] = 1;
       screen[x+1][y-1] = 1;  
     }
+    bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      if(screen[x][y] == 1 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y-1] == 1)
+        return false;
+      return true;
+    }
 
     void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
       int x = _point.getX(), y = _point.getY();
@@ -1242,7 +1295,7 @@ class SBlock : public Block{
 };
 class TBlock : public Block{
   public:
-   TBlock() : Block(4,S_BLOCK,Point(5,1)){};
+   TBlock() : Block(4,T_BLOCK,Point(5,1)){};
    void rotateBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen,bool clockwise) override {
       int x = _point.getX(),y = _point.getY();
       if(clockwise){
@@ -1304,12 +1357,12 @@ class TBlock : public Block{
       if(clockwise)
         switch (currentRotation) {
           case(0):{
-            if(y == SCREEN_BOX_HEIGHT-1) return false;
+            if(x == 0 || y == SCREEN_BOX_HEIGHT-1) return false;
             bool res = screen[x][y+1];
             return !res;
           }
           case(1):{
-            if(x == SCREEN_BOX_WIDTH-1) return false;
+            if(x == 0) return false;
             bool res = screen[x-1][y];
             return !res;
           }
@@ -1318,7 +1371,7 @@ class TBlock : public Block{
             return !res;
           }
           case(3):{
-            if(x == 0) return false;
+            if(x == SCREEN_BOX_WIDTH - 1) return false;
             bool res = screen[x+1][y];
             return !res;
           }
@@ -1326,6 +1379,7 @@ class TBlock : public Block{
       else{
         switch (currentRotation) {
           case(0):{
+                    
             bool res = screen[x][y+1];
             return !res;
           }
@@ -1412,7 +1466,7 @@ class TBlock : public Block{
           return !res;
         }
         case(1):{
-          if(x == SCREEN_BOX_WIDTH-1) return false;
+          if(x == SCREEN_BOX_WIDTH-2) return false;
           bool res = screen[x+1][y-1] || screen[x+2][y] || screen[x+1][y+1];
           return !res;
         }
@@ -1476,7 +1530,12 @@ class TBlock : public Block{
       screen[x][y-1] = 1;
       screen[x+1][y] = 1;
     }
-
+    bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      if(screen[x][y] == 1 || screen[x-1][y] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
+        return false;
+      return true;
+    }
   void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
     int x = _point.getX(),y = _point.getY();
       switch (_currentRotation) {
@@ -1556,7 +1615,7 @@ class TBlock : public Block{
 };
 class ZBlock : public Block{
   public:
-    ZBlock() : Block(2,S_BLOCK,Point(5,1)){};
+    ZBlock() : Block(2,Z_BLOCK,Point(5,1)){};
 
    void rotateBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen,bool clockwise) override {
       int x = _point.getX(),y = _point.getY();
@@ -1590,7 +1649,7 @@ class ZBlock : public Block{
           return !res;
         }
         case(1):{
-          if(x == SCREEN_BOX_WIDTH - 1) return false;
+          if(x == 0) return false;
           bool res = screen[x][y-1] || screen[x-1][y-1];
           return !res;
         }
@@ -1677,6 +1736,12 @@ class ZBlock : public Block{
       screen[x-1][y-1] = 1;
       screen[x][y-1] = 1;
       screen[x+1][y] = 1;  
+    } 
+    bool canPlaceBlock(std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> &screen) override{
+      int x = _point.getX(), y = _point.getY();
+      if(screen[x][y] == 1 || screen[x-1][y-1] == 1 || screen[x][y-1] == 1 || screen[x+1][y] == 1)
+        return false;
+      return true;
     }
 
     void moveLeft(std::array<std::array<int, 20>, 10> &screen) override{
@@ -1733,17 +1798,33 @@ class Game{
     Block* currentBlock;
     Block* nextBlock;
     Score score;
+    int currentLevel;
   public:
     std::array<std::array<int, SCREEN_BOX_HEIGHT>, SCREEN_BOX_WIDTH> screen;
-    
+    std::array<std::array<int, 5>, 5> nextBlockScreen;
     Game(){
       currentBlock = nullptr;
       nextBlock = nullptr;
+      currentLevel = 1;
       for(int i = 0; i < SCREEN_BOX_WIDTH;i++){
         for(int j = 0; j < SCREEN_BOX_HEIGHT; j++){
           screen[i][j] = 0;
         }
       }
+      for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
+          nextBlockScreen[i][j] = 0;
+        }
+      }
+    }
+
+    void restartScreen(){
+      for(int i = 0; i < SCREEN_BOX_WIDTH;i++){
+        for(int j = 0; j < SCREEN_BOX_HEIGHT; j++){
+          screen[i][j] = 0;
+        }
+      }
+
     }
 
     void generateNextBlock(int n){
@@ -1782,20 +1863,144 @@ class Game{
       }
     }
 
-    void DrawNextShape();
+    void drawNextShape(){
+      switch (nextBlock->getBlockType()) {
+        case(J_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,1,0,0},
+            {0,1,1,0,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+        case(L_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,1,0,0},
+            {0,0,1,1,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+        case(I_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,0,1,0,0},
+            {0,0,1,0,0},
+            {0,0,1,0,0},
+            {0,0,1,0,0}
+          }};
+          break;
+        }
+        case(O_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,0,1,1,0},
+            {0,0,1,1,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+        case(S_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,0,1,1,0},
+            {0,1,1,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+        case(T_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,1,1,1,0},
+            {0,0,1,0,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+        case(Z_BLOCK):{
+          nextBlockScreen = {{
+            {0,0,0,0,0},
+            {0,1,1,0,0},
+            {0,0,1,1,0},
+            {0,0,0,0,0},
+            {0,0,0,0,0}
+          }};
+          break;
+        }
+      }
+    }
     
-    void setCurrentBlock(){
+    bool isLineFull(std::array<std::array<int, SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH> screen, int n){
+      for(int i = 0; i < SCREEN_BOX_WIDTH; i++){
+        if(screen[i][n] == 0) return false;
+      }
+      return true;
+    }
+    bool isLineEmpty(std::array<std::array<int, SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH> screen, int n){
+      for(int i = 0; i < SCREEN_BOX_WIDTH; i++){
+        if(screen[i][n] != 0) return false;
+      }
+      return true;
+    }
+    
+    void clearLine(std::array<std::array<int, SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH> &screen, int n){
+      for(int i = 0; i < SCREEN_BOX_WIDTH; i++){
+        screen[i][n] = 0;
+      }
+
+    }
+
+    void swapLines(std::array<std::array<int, SCREEN_BOX_HEIGHT>,SCREEN_BOX_WIDTH> &screen, int n,int m){
+     for(int i = 0; i < SCREEN_BOX_WIDTH; i++){
+      std::swap(screen[i][n],screen[i][m]);
+     } 
+    }
+
+    void clearLines(){
+      int linesDeleted = 0;
+      for(int i = 0; i < SCREEN_BOX_HEIGHT; i++){
+        if(isLineFull(screen, i)){
+          clearLine(screen,i);
+          int j = i;
+          linesDeleted++;
+          while (j > 0 && !isLineEmpty(screen,j-1)) {
+            swapLines(screen, j-1, j);
+            j--;
+          }
+        }
+      }
+      score.increaseScore(linesDeleted,currentLevel);
+    }
+
+    bool setCurrentBlock(){
       free(currentBlock);
       currentBlock = nextBlock;
       generateNextBlock(-1);
-      currentBlock->placeBlock(screen);
+      clearLines();
+      if(currentBlock->canPlaceBlock(screen)){
+        currentBlock->placeBlock(screen);
+        return true;
+      }
+      return false;
     }
-    void moveCurrentBlockDown(){
+    int moveCurrentBlockDown(){
       if(currentBlock->canMoveDown(screen)){
         currentBlock->moveDown(screen);
+        return 0; // can move down;
       }
       else{
-        setCurrentBlock();
+        if(setCurrentBlock()){
+          return 1;
+        }
+        return -1;
       }
     }
 
@@ -1805,6 +2010,14 @@ class Game{
     Block* getCurrentBlock(){
       return currentBlock;
     }
+    
+    Score getScore(){
+      return score;
+    }
+    
+    int getCurrentLevel(){
+      return currentLevel;
+    }
 
 };
 
@@ -1813,19 +2026,22 @@ class Game{
 int main ()
 {
   Game game;
-
+  int delay = 0;
 	SetConfigFlags(FLAG_WINDOW_HIGHDPI);
-
-	InitWindow(400, 600, "OOP-Tetris");
+  bool gameActive = true;
+	InitWindow(600, 900, "OOP-Tetris");
   int framecount = 0;
+  int blockSpeed = levelTimes[0];
   SetTargetFPS(60);
   int spawnedBlocks = 0;
   int screenStartX = 50, screenEndX = 300;
   int screenStartY = 80, screenEndY = 580;
+  int nextScreenStartX = 350, nextScreenEndX = 475,
+      nextScreenStartY = 150, nextScreenEndY = 275;
   int dX = (screenEndX - screenStartX) / SCREEN_BOX_WIDTH;
   int dY = (screenEndY - screenStartY) / SCREEN_BOX_HEIGHT;
 
-  game.generateNextBlock(5);
+  game.generateNextBlock(-1);
   game.setCurrentBlock();
 
 	while (!WindowShouldClose())		// run the loop until the user presses ESCAPE or presses the Close button on the window
@@ -1834,39 +2050,90 @@ int main ()
 		BeginDrawing();
   
 		ClearBackground(WHITE);
-    DrawFPS(0, 0);
-    DrawRectangleLines(screenStartX,screenStartY,250,500, BLACK);
-    for(int i = 0; i < SCREEN_BOX_HEIGHT; i++){
-      for(int j = 0; j < SCREEN_BOX_WIDTH; j++){
-        if(game.screen[j][i] == 1)
-            DrawRectangle(screenStartX + j * dX, screenStartY + i * dY, dX,dY,RED);
+    //DrawFPS(0, 0);
+    if(gameActive){
+      // Display main game screen
+      DrawRectangleLines(screenStartX,screenStartY,250,500, BLACK);
+      for(int i = 0; i < SCREEN_BOX_HEIGHT; i++){
+        for(int j = 0; j < SCREEN_BOX_WIDTH; j++){
+          if(game.screen[j][i] == 1)
+              DrawRectangle(screenStartX + j * dX, screenStartY + i * dY, dX,dY,RED);
+        }
       }
-    }
-    
-    if(IsKeyPressed(KEY_X) && game.getCurrentBlock()->canRotate(game.screen, true)){
-      game.getCurrentBlock()->rotateBlock(game.screen, true);
-    }
-    if(IsKeyPressed(KEY_Z) && game.getCurrentBlock()->canRotate(game.screen, false)){
-      game.getCurrentBlock()->rotateBlock(game.screen,false);
-    }
-    if(IsKeyPressed(KEY_LEFT) && game.getCurrentBlock()->canMoveLeft(game.screen)){
-      game.getCurrentBlock()->moveLeft(game.screen);
-    }
-    if(IsKeyPressed(KEY_RIGHT) && game.getCurrentBlock()->canMoveRight(game.screen)){
-      game.getCurrentBlock()->moveRight(game.screen);
+      DrawRectangleLines(nextScreenStartX, nextScreenStartY, 5*dX, 5*dY,BLACK);
+      game.drawNextShape();
+      // Display next Block
+      for(int i = 0; i < 5; i++){
+        for(int j = 0; j < 5; j++){
+          if(game.nextBlockScreen[j][i] == 1)
+            DrawRectangle(nextScreenStartX + i * dX,nextScreenStartY + j * dY, dX, dY, RED);
+        }
+      }
+      // Display current Score;
+      DrawRectangleLines(nextScreenStartX, nextScreenStartY + 150, 125, 125, BLACK);
+      std::string txt = "Score: " + std::to_string(game.getScore().getCurrentScore());
+      DrawText(txt.c_str(), 360, 320 , 20, BLACK);
+      txt = "Level: " + std::to_string(game.getCurrentLevel());
+      DrawText(txt.c_str(), 360, 360 , 20, BLACK);
+      framecount++;
+      if(delay != 0 && framecount <= delay){
+        EndDrawing();
+        continue;
+      }
+      else if (delay != 0) {
+        delay = 0;
+      }
+      // catch key presses
+      if(IsKeyPressed(KEY_X) && game.getCurrentBlock()->canRotate(game.screen, true)){
+        game.getCurrentBlock()->rotateBlock(game.screen, true);
+      }
+      if(IsKeyPressed(KEY_Z) && game.getCurrentBlock()->canRotate(game.screen, false)){
+        game.getCurrentBlock()->rotateBlock(game.screen,false);
+      }
+      if(IsKeyPressed(KEY_LEFT) && game.getCurrentBlock()->canMoveLeft(game.screen)){
+        game.getCurrentBlock()->moveLeft(game.screen);
+      }
+      if(IsKeyPressed(KEY_RIGHT) && game.getCurrentBlock()->canMoveRight(game.screen)){
+        game.getCurrentBlock()->moveRight(game.screen);
+      }
+      
+      if(game.getCurrentLevel() > 30){
+        blockSpeed = levelTimes[28];
+      }
+      else{
+        blockSpeed = levelTimes[game.getCurrentLevel()];
+      }
+
+
+      //DrawRectangleLines(50,30,250,30, BLACK);
+      if(framecount >= blockSpeed){
+        switch (game.moveCurrentBlockDown()) {
+          case(0):{
+            break;
+          }
+          case(1):{
+            delay = 20/game.getCurrentLevel();
+            break;
+          }
+          case(-1):{
+            gameActive = false;
+            break;
+          }
+        }      
+        framecount = 0;
+      }
+    }else{
+      DrawText("GameOver\n press SPACE to restart", 300, 300, 20, BLACK);
+      if(IsKeyPressed(KEY_SPACE)){
+        gameActive = true;
+      }
+      game.restartScreen();
+      game.getScore().resetScore();
     }
 
-    framecount++;
-    //DrawRectangleLines(50,30,250,30, BLACK);
-    if(framecount >= 20){
-      game.moveCurrentBlockDown();
-      framecount = 0;
-    }
 		EndDrawing();
     
 	}
-
-
 	CloseWindow();
 	return 0;
 }
