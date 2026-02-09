@@ -80,7 +80,7 @@ class Score{
 
   }
 
-  int getCurrentScore(){
+  long getCurrentScore(){
     return currentScore;
   }
 
